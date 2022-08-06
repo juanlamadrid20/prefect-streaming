@@ -36,7 +36,7 @@ def load_prices(df: pd.DataFrame) -> None:
     table_name = "crypto"
     wr.s3.to_parquet(
         df=df,
-        path="s3://prefectdata/crypto/",
+        path="s3://prefectdata-use1/crypto/",
         dataset=True,
         mode="append",
         database="default",
@@ -46,7 +46,7 @@ def load_prices(df: pd.DataFrame) -> None:
     logger.info("Table %s in Athena data lake successfully updated 🚀", table_name)
 
 
-@flow(task_runner=SequentialTaskRunner(), retries=5, retry_delay_seconds=5)
+@flow(task_runner=SequentialTaskRunner(), retries=2, retry_delay_seconds=3)
 def real_time_flow():
     # Real-time data pipeline
     raw_prices = extract_prices()
