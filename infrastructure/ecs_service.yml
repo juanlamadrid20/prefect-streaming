@@ -133,8 +133,6 @@ Resources:
   PrefectECSService:
     Type: AWS::ECS::Service
     DependsOn:
-      - SubnetRouteTableAssociation
-      - RouteToGateway
       - PrefectFargateCluster
     Properties:
       ServiceName: !Ref project
