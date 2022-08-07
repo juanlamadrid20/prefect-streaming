@@ -1,4 +1,4 @@
-name: Delete ECS Cluster, Prefect ECS Service and ECR repository
+name: Delete [Cluster,Service,Repo]
 
 on:
   workflow_dispatch:

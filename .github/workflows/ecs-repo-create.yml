@@ -1,4 +1,4 @@
-name: Deploy ECS Repo
+name: Create ECS Repo
 
 on:
   workflow_dispatch:

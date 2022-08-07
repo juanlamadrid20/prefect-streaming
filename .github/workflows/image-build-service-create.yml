@@ -1,4 +1,4 @@
-name: Deploy Prefect Streaming Service to AWS ECS
+name: Deploy Service
 
 on:
   workflow_dispatch:
