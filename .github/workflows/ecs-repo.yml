@@ -1,0 +1,37 @@
+name: Deploy ECS Repo
+
+on:
+  workflow_dispatch:
+
+env:
+  PROJECT: realtime-poc
+  ECS_CLUSTER: prefect-streaming
+
+jobs:
+  ecr-repository:
+    name: Create ECR repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Summary
+        run: echo "### Workflow $GITHUB_WORKFLOW with GITHUB_SHA $GITHUB_SHA" >> $GITHUB_STEP_SUMMARY
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Create new ECR repository using AWS CloudFormation
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: "${{ env.PROJECT }}-ecr"
+          template: infrastructure/ecr_repository.yml
+          parameter-overrides: "RepositoryName=${{ env.PROJECT }}"
+          no-fail-on-empty-changeset: "1"
+
+      - name: ECR repository built
+        run: echo "ECR repository built at $(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_STEP_SUMMARY
