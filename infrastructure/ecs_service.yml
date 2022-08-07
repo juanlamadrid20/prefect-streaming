@@ -5,6 +5,14 @@ Description: >
   running a Prefect Streaming Service in a subnet created within that VPC
 
 Parameters:
+
+  VPCResourceStack:
+    Type: String
+    MinLength: 1
+    MaxLength: 255
+    AllowedPattern: "^[a-zA-Z][-a-zA-Z0-9]*$"
+    Default: vpc-stack
+
   cpu:
     Type: String
     Description: Allow Dynamic CPU configuration
@@ -47,46 +55,6 @@ Resources:
     Properties:
       LogGroupName: !Ref project
       RetentionInDays: 7
-
-  PrefectVPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: 10.0.0.0/16
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-  InternetGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      VpcId: !Ref PrefectVPC
-      InternetGatewayId: !Ref InternetGateway
-  PublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref PrefectVPC
-  RouteToGateway:
-    Type: AWS::EC2::Route
-    DependsOn: InternetGatewayAttachment
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-  PrefectECSServiceSubnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref PrefectVPC
-      CidrBlock: 10.0.0.0/16
-      AvailabilityZone:
-        Fn::Select:
-          - 0
-          - Fn::GetAZs: { Ref: 'AWS::Region' }
-      MapPublicIpOnLaunch: true
-  SubnetRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PrefectECSServiceSubnet
-      RouteTableId: !Ref PublicRouteTable
 
   ExecutionRole:
     Type: AWS::IAM::Role
@@ -178,4 +146,5 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            - !Ref PrefectECSServiceSubnet
+            - Fn::ImportValue: !Sub '${VPCResourceStack}-PrivateSubnet1'
+            - Fn::ImportValue: !Sub '${VPCResourceStack}-PrivateSubnet2'
